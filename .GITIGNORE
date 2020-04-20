@@ -1,0 +1,13 @@
+# HERE ARE THE KEY TO IGNORE FILES OR SPECIFIC PATHS.
+#
+# Files in ANY path: 
+#   *.ext
+# Root Folders: 
+#   node_modules/
+# Folder or File with the same pre-name: 
+#   wp-content/plugins/learnpress*/
+# Ignore everything in a path except:
+#   wp-content/*
+#   !wp-content/plugins/
+#   !wp-content/themes/sample-theme/
+#
