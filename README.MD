@@ -2,6 +2,12 @@
 
 This repo will focus on creating scripts for automating stuffs like installation of dev stacks.
 
+# Issues Found
+
+- Running lempstack.sh sometimes return:
+- /bin/bash^M: bad interpreter: No such file or directory
+- run: '''sed -i -e 's/\r$//' scriptname.sh'''
+
 ## Contributing
 
 Please read [CONTRIBUTING](CONTRIBUTING) for details on our code of conduct, and the process for submitting pull requests to us.
