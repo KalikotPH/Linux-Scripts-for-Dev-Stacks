@@ -55,7 +55,7 @@ bc_install() {
     sleep 1
 
     ########## INSTALL MARIADB ##########
-    echo "Bytes Crafter: Installing MYSQL..."
+    echo "Bytes Crafter: Installing MARIADB..."
     echo ""
     sleep 1
         apt install mariadb-server -y
@@ -162,7 +162,7 @@ EOF
         local mid=`ip a | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'`
         local end="/ to setup your WordPress."
         echo "Bytes Crafter: $start$mid$end"
-        echo "Bytes Crafter: MySQL db: wordpress user:wordpress pwd: wordpress "
+        echo "Bytes Crafter: MySQL db: wordpress user: wordpress pwd: wordpress "
         echo "Bytes Crafter: Thank you for using our script, Bytes Crafter! ..."
     echo ""
     sleep 1
