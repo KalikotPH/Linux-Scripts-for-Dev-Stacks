@@ -25,18 +25,18 @@ f_check_root() {
         f_sub_main
     else
         # If user not is root, print message and exit script
-        echo "USocketNet: Please run this script by user root ."
+        echo "Bytes Crafter: Please run this script by user root ."
         exit
     fi
 }
 
 # Function update os
 f_update_os() {
-    echo "USocketNet: Trying to update the system ..."
+    echo "Bytes Crafter: Trying to update the system ..."
     echo ""
     sleep 1
-    apt update
-    apt upgrade -y
+        apt update
+        apt upgrade -y
     echo ""
     sleep 1
 }
@@ -45,38 +45,38 @@ f_update_os() {
 f_install_lemp() {
     # Install and start nginx
     echo ""
-    echo "USocketNet: Installing NGINX ..."
+    echo "Bytes Crafter: Installing NGINX ..."
     echo ""
     sleep 1
-    apt install nginx -y
-    systemctl enable nginx && systemctl restart nginx
+        apt install nginx -y
+        systemctl enable nginx && systemctl restart nginx
     echo ""
     sleep 1
 
     ########## INSTALL MARIADB ##########
-    echo "USocketNet: Installing MYSQL ..."
+    echo "Bytes Crafter: Installing MYSQL ..."
     echo ""
     sleep 1
-    apt install mariadb-server -y
-    systemctl enable mysql && systemctl restart mysql
+        apt install mariadb-server -y
+        systemctl enable mysql && systemctl restart mysql
     echo ""
     sleep 1
 
-    echo "USocketNet: CREATING DB AND USER ..."
+    echo "Bytes Crafter: CREATING DB AND USER ..."
     echo ""
-    mysql -uroot -proot -e "CREATE DATABASE usocketnet /*\!40100 DEFAULT CHARACTER SET utf8 */;"
-    mysql -uroot -proot -e "CREATE USER usocketnet@localhost IDENTIFIED BY 'usocketnet';"
-    mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON usocketnet.* TO 'usocketnet'@'localhost';"
-    mysql -uroot -proot -e "FLUSH PRIVILEGES;"
+        mysql -uroot -proot -e "CREATE DATABASE wordpress /*\!40100 DEFAULT CHARACTER SET utf8 */;"
+        mysql -uroot -proot -e "CREATE USER wordpress@localhost IDENTIFIED BY 'wordpress';"
+        mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpress'@'localhost';"
+        mysql -uroot -proot -e "FLUSH PRIVILEGES;"
     echo ""
     sleep 1
 
     ########## INSTALL PHP7 ##########
     # This is unofficial repository, it's up to you if you want to use it.
-    echo "USocketNet: Installing PHP 7 ..."
+    echo "Bytes Crafter: Installing PHP 7.3 ..."
     echo ""
     sleep 1
-    apt install php7.3 php7.3-cli php7.3-common php7.3-fpm php7.3-gd php7.3-mysql -y
+        apt install php7.3 php7.3-cli php7.3-common php7.3-fpm php7.3-gd php7.3-mysql -y
     echo ""
     sleep 1
 
@@ -92,29 +92,35 @@ f_install_lemp() {
     # sed -i 's:;listen.mode = 0660:listen.mode = 0660:g' /etc/php/7.3/fpm/pool.d/www.conf
 
     # Increase max upload size on php.
-    sed -i 's:# Basic Settings:client_max_body_size 24m;:g' /etc/nginx/nginx.conf
-    sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 12M/g' /etc/php/7.3/fpm/php.ini
-    sed -i 's/post_max_size = 2M/post_max_size = 12M/g' /etc/php/7.3/fpm/php.ini
-    systemctl restart php7.3-fpm
-
-    # Create web root directory and php info file
-    echo "USocketNet: Createing demo PHP info file ..."
+    echo "Bytes Crafter: Making Nginx and PHP server max upload size of 12MB..."
     echo ""
     sleep 1
-    mkdir /var/www/usocketnet
-    echo "<?php phpinfo(); ?>" >/var/www/usocketnet/info.php
-    chown -R www-data:www-data /var/www/usocketnet
+        sed -i 's:# Basic Settings:client_max_body_size 24m;:g' /etc/nginx/nginx.conf
+        sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 12M/g' /etc/php/7.3/fpm/php.ini
+        sed -i 's/post_max_size = 2M/post_max_size = 12M/g' /etc/php/7.3/fpm/php.ini
+    echo ""
+    sleep 1
+
+    # Create web root directory and php info file
+    echo "Bytes Crafter: Createing demo PHP info file ..."
+    echo ""
+    sleep 1
+        mkdir /var/www/wordpress
+        echo "<?php phpinfo(); ?>" >/var/www/wordpress/info.php
+        chown -R www-data:www-data /var/www/wordpress
+    echo ""
+    sleep 1
 
     # Create demo nginx vhost config file
-    echo "USocketNet: Creating demo Nginx vHost config file ..."
+    echo "Bytes Crafter: Creating demo Nginx vHost config file ..."
     echo ""
-    sleep 1r
-    cat >/etc/nginx/sites-enabled/default <<"EOF"
+    sleep 1
+cat >/etc/nginx/sites-enabled/default <<"EOF"
 server {
     listen 80;
     listen [::]:80;
 
-    root /var/www/usocketnet;
+    root /var/www/wordpress;
     index index.php index.html index.htm;
 
     server_name _;
@@ -136,36 +142,39 @@ server {
     }
 }
 EOF
+    echo ""
+    sleep 1
 
     # Restart nginx and php-fpm
     echo "SocketNet: Restarting Nginx & PHP ..."
     echo ""
     sleep 1
-    systemctl restart nginx
-    systemctl restart php7.3-fpm
-
-    #Install WordPress here latest.
-    echo "SocketNet: Installing WordPress ..."
-    echo ""
-    wget -c http://wordpress.org/latest.tar.gz
-    tar -xzvf latest.tar.gz
-    rsync -av wordpress/* /var/www/usocketnet/
-    chown -R www-data:www-data /var/www/usocketnet/
-    chmod -R 755 /var/www/usocketnet/
+        systemctl restart nginx
+        systemctl restart php7.3-fpm
     echo ""
     sleep 1
 
+    #Install WordPress here latest.
+    echo "Bytes Crafter: Installing WordPress ..."
     echo ""
-    echo "You can access http://YOUR-SERVER-IP/ to setup your WordPress."
-    echo "MySQL db: usocketnet user:usocketnet pwd: usocketnet "
-    echo "Thank you for using our script, Bytes Crafter! ..."
-    echo "http://www.bytescrafter.net ..."
+        wget -c http://wordpress.org/latest.tar.gz
+        tar -xzvf latest.tar.gz
+        rsync -av wordpress/* /var/www/wordpress/
+        chown -R www-data:www-data /var/www/wordpress/
+        chmod -R 755 /var/www/wordpress/
+    echo ""
+    sleep 1
+
+    sleep 1
+    echo ""
+        echo "You can access http://YOUR-SERVER-IP/ to setup your WordPress."
+        echo "MySQL db: wordpress user:wordpress pwd: wordpress "
+        echo "Thank you for using our script, Bytes Crafter! ..."
+        echo "http://www.bytescrafter.net ..."
     echo ""
     sleep 1
 
 }
-
-
 
 # The sub main function, use to call neccessary functions of installation
 f_sub_main() {
