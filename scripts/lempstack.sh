@@ -12,17 +12,17 @@
 # 4. PHP 7: 7.3.3-1+0~20190307202245.32+stretch~1.gbp32ebb2
 #--------------------------------------------------
 # List function:
-# 1. f_check_root: check to make sure script can be run by user root
-# 2. f_update_os: update all the packages
-# 3. f_install_lemp: funtion to install LEMP stack
-# 4. f_sub_main: function use to call the main part of installation
-# 5. f_main: the main function, add your functions to this place
+# 1. bc_checkroot: check to make sure script can be run by user root
+# 2. bc_update: update all the packages
+# 3. bc_install: funtion to install LEMP stack
+# 4. bc_init: function use to call the main part of installation
+# 5. bc_main: the main function, add your functions to this place
 
 # Function check user root
-f_check_root() {
+bc_checkroot() {
     if (($EUID == 0)); then
-        # If user is root, continue to function f_sub_main
-        f_sub_main
+        # If user is root, continue to function bc_init
+        bc_init
     else
         # If user not is root, print message and exit script
         echo "Bytes Crafter: Please run this script by user root ."
@@ -31,8 +31,8 @@ f_check_root() {
 }
 
 # Function update os
-f_update_os() {
-    echo "Bytes Crafter: Trying to update the system ..."
+bc_update() {
+    echo "Bytes Crafter: Initiating Update and Upgrade..."
     echo ""
     sleep 1
         apt update
@@ -42,10 +42,11 @@ f_update_os() {
 }
 
 # Function install LEMP stack
-f_install_lemp() {
-    # Install and start nginx
+bc_install() {
+
+    ########## INSTALL NGINX ##########
     echo ""
-    echo "Bytes Crafter: Installing NGINX ..."
+    echo "Bytes Crafter: Installing NGINX..."
     echo ""
     sleep 1
         apt install nginx -y
@@ -54,7 +55,7 @@ f_install_lemp() {
     sleep 1
 
     ########## INSTALL MARIADB ##########
-    echo "Bytes Crafter: Installing MYSQL ..."
+    echo "Bytes Crafter: Installing MYSQL..."
     echo ""
     sleep 1
         apt install mariadb-server -y
@@ -62,7 +63,7 @@ f_install_lemp() {
     echo ""
     sleep 1
 
-    echo "Bytes Crafter: CREATING DB AND USER ..."
+    echo "Bytes Crafter: CREATING DB and USER ..."
     echo ""
         mysql -uroot -proot -e "CREATE DATABASE wordpress /*\!40100 DEFAULT CHARACTER SET utf8 */;"
         mysql -uroot -proot -e "CREATE USER wordpress@localhost IDENTIFIED BY 'wordpress';"
@@ -73,26 +74,15 @@ f_install_lemp() {
 
     ########## INSTALL PHP7 ##########
     # This is unofficial repository, it's up to you if you want to use it.
-    echo "Bytes Crafter: Installing PHP 7.3 ..."
+    echo "Bytes Crafter: Installing PHP 7.3..."
     echo ""
     sleep 1
         apt install php7.3 php7.3-cli php7.3-common php7.3-fpm php7.3-gd php7.3-mysql -y
     echo ""
     sleep 1
 
-    # Config to make PHP-FPM working with Nginx
-    # echo "SocketNet: Binding PHP-FPM with Nginx ..."
-    # echo ""
-    # sleep 1
-    # sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=1/g' /etc/php/7.3/fpm/php.ini
-    # sed -i 's:user = www-data:user = nginx:g' /etc/php/7.3/fpm/pool.d/www.conf
-    # sed -i 's:group = www-data:group = nginx:g' /etc/php/7.3/fpm/pool.d/www.conf
-    # sed -i 's:listen.owner = www-data:listen.owner = nginx:g' /etc/php/7.3/fpm/pool.d/www.conf
-    # sed -i 's:listen.group = www-data:listen.group = nginx:g' /etc/php/7.3/fpm/pool.d/www.conf
-    # sed -i 's:;listen.mode = 0660:listen.mode = 0660:g' /etc/php/7.3/fpm/pool.d/www.conf
-
-    # Increase max upload size on php.
-    echo "Bytes Crafter: Making Nginx and PHP server max upload size of 12MB..."
+    ########## MODIFY GLOBAL CONFIGS ##########
+    echo "Bytes Crafter: Modifying Global Configurations..."
     echo ""
     sleep 1
         sed -i 's:# Basic Settings:client_max_body_size 24m;:g' /etc/nginx/nginx.conf
@@ -101,8 +91,8 @@ f_install_lemp() {
     echo ""
     sleep 1
 
-    # Create web root directory and php info file
-    echo "Bytes Crafter: Createing demo PHP info file ..."
+    ########## PREPARE DIRECTORIES ##########
+    echo "Bytes Crafter: Preparing WordPress directory..."
     echo ""
     sleep 1
         mkdir /var/www/wordpress
@@ -111,8 +101,8 @@ f_install_lemp() {
     echo ""
     sleep 1
 
-    # Create demo nginx vhost config file
-    echo "Bytes Crafter: Creating demo Nginx vHost config file ..."
+    ########## MODIFY VHOST CONFIG ##########
+    echo "Bytes Crafter: Modifying Default VHost for Nginx..."
     echo ""
     sleep 1
 cat >/etc/nginx/sites-enabled/default <<"EOF"
@@ -145,8 +135,8 @@ EOF
     echo ""
     sleep 1
 
-    # Restart nginx and php-fpm
-    echo "SocketNet: Restarting Nginx & PHP ..."
+    ########## RESTARTING NGINX AND PHP ##########
+    echo "Bytes Crafter: Restarting Nginx & PHP..."
     echo ""
     sleep 1
         systemctl restart nginx
@@ -154,8 +144,8 @@ EOF
     echo ""
     sleep 1
 
-    #Install WordPress here latest.
-    echo "Bytes Crafter: Installing WordPress ..."
+    ########## INSTALLING WORDPRESS ##########
+    echo "Bytes Crafter: Installing WordPress..."
     echo ""
         wget -c http://wordpress.org/latest.tar.gz
         tar -xzvf latest.tar.gz
@@ -165,28 +155,29 @@ EOF
     echo ""
     sleep 1
 
+    ########## ENDING MESSAGE ##########
     sleep 1
     echo ""
-        echo "You can access http://YOUR-SERVER-IP/ to setup your WordPress."
-        echo "MySQL db: wordpress user:wordpress pwd: wordpress "
-        echo "Thank you for using our script, Bytes Crafter! ..."
-        echo "http://www.bytescrafter.net ..."
+        local start="Bytes Crafter: You can access http://"
+        local mid=`ip a | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'`
+        local end="/ to setup your WordPress."
+        echo "Bytes Crafter: $start$mid$end"
+        echo "Bytes Crafter: MySQL db: wordpress user:wordpress pwd: wordpress "
+        echo "Bytes Crafter: Thank you for using our script, Bytes Crafter! ..."
     echo ""
     sleep 1
 
 }
 
-# The sub main function, use to call neccessary functions of installation
-f_sub_main() {
-    f_update_os
-    f_install_lemp
+# initialized the whole installation.
+bc_init() {
+    bc_update
+    bc_install
 }
 
-# The main function
-f_main() {
-    f_check_root
-    f_sub_main
+# primary function check.
+bc_main() {
+    bc_checkroot
 }
-f_main
-
+bc_main
 exit
